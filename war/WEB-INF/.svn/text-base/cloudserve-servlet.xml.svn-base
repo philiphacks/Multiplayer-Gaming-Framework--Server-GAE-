@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
+	http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+	
+	<!-- WSDL Location and ID -->
+	<bean id="GamingService" class="org.springframework.ws.wsdl.wsdl11.SimpleWsdl11Definition"
+		p:wsdl="/wsdl/mgf.wsdl"/>
+		
+	<!-- Context -->
+	<context:component-scan base-package="be.tbs.mgf"/>
+	<context:annotation-config/>
+	
+	<!-- SOAP Message Routing -->
+	<bean class="org.springframework.ws.soap.server.endpoint.mapping.SoapActionAnnotationMethodEndpointMapping">
+		<property name="interceptors">
+			<list>
+				<bean class="org.springframework.ws.server.endpoint.interceptor.PayloadLoggingInterceptor"/>
+				<ref bean="validatingInterceptor"/>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- Message (Un)Marshalling -->
+	<bean class="org.springframework.ws.server.endpoint.adapter.GenericMarshallingMethodEndpointAdapter" >
+		<constructor-arg ref="marshaller" index="0"/>
+	</bean>
+	<bean id="marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="classesToBeBound">
+			<list>
+				<value>be.tbs.mgf.schemas.Error</value>
+				<value>be.tbs.mgf.schemas.JoinReply</value>
+				<value>be.tbs.mgf.schemas.JoinRequest</value>
+				<value>be.tbs.mgf.schemas.LeaveReply</value>
+				<value>be.tbs.mgf.schemas.LeaveRequest</value>
+				<value>be.tbs.mgf.schemas.Message</value>
+				<value>be.tbs.mgf.schemas.Ping</value>
+				<value>be.tbs.mgf.schemas.PlayerDescriptor</value>
+				<value>be.tbs.mgf.schemas.Pong</value>
+				<value>be.tbs.mgf.schemas.Reply</value>
+				<value>be.tbs.mgf.schemas.Request</value>
+				<value>be.tbs.mgf.schemas.StatusProperty</value>
+				<value>be.tbs.mgf.schemas.StatusReply</value>
+				<value>be.tbs.mgf.schemas.StatusRequest</value>
+			</list>
+		</property>
+		<property name="schema" value="/wsdl/mgf.xsd" />
+	</bean>
+	
+	<!-- Payload Logging -->
+	<bean class="org.springframework.ws.server.endpoint.mapping.PayloadRootAnnotationMethodEndpointMapping">
+		<property name="interceptors">
+			<list>
+				<bean class="org.springframework.ws.server.endpoint.interceptor.PayloadLoggingInterceptor"/>
+				<ref bean="validatingInterceptor"/>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- Google App Engine Version of the AxiomSoapMessageFactory -->
+    <bean id="messageFactory" class="be.tbs.mgf.cloud.soap.GAEAxiomSoapMessageFactory">
+        <property name="payloadCaching" value="true"/>
+        <property name="attachmentCaching" value="false"/>
+    </bean>
+	
+	<!-- Error Handling & Validation -->
+	<bean class="org.springframework.ws.soap.server.endpoint.SoapFaultAnnotationExceptionResolver">
+		<property name="order" value="2"/>
+	</bean>	
+	<bean id="validatingInterceptor"
+		class="org.springframework.ws.soap.server.endpoint.interceptor.PayloadValidatingInterceptor"
+		p:schema="/wsdl/mgf.xsd"
+		p:validateRequest="true"
+		p:validateResponse="true"/>
+</beans>

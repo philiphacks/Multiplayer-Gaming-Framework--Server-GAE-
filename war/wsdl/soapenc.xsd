@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="yes"?>
+<xs:schema id="Envelope" targetNamespace="http://schemas.xmlsoap.org/soap/encoding/" 
+		xmlns:mstns="http://schemas.xmlsoap.org/soap/envelope/" 
+		xmlns="http://schemas.xmlsoap.org/soap/encoding/" 
+		xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+		xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" 
+		attributeFormDefault="qualified" elementFormDefault="qualified">
+			
+	<xs:attribute name="root" msdata:Prefix="soapenc" type="xs:string" />
+</xs:schema>
